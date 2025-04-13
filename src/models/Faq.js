@@ -23,8 +23,15 @@ const faqSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+faqSchema.index({
+  question: "text",
+  answer: "text",
+  tags: "text",
+  keywords: "text",
+});
+
 faqSchema.pre("save", function (next) {
-  this.updated_at = Date.now();
+  this.updatedAt = Date.now();
   next();
 });
 
