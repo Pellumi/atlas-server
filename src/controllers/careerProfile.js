@@ -1,4 +1,5 @@
 import UserCareerProfile from "../models/UserCareerProfile.js";
+import ErrorHandler from "../utils/ErrorHandler.js";
 import { extractContentFromFile } from "../utils/fileMethods.js";
 
 const createOrUpdateCareerProfile = async (req, res, next) => {
@@ -60,7 +61,7 @@ const getUserCareerProfile = async (req, res, next) => {
   const profile = await UserCareerProfile.findOne({ user_id });
 
   if (!profile) {
-    return next(ErrorReturn.NotFound("Career profile"));
+    return next(ErrorHandler.NotFound("Career profile"));
   }
 
   res.status(200).json(profile);
