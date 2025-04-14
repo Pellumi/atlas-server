@@ -53,3 +53,70 @@ export const generateAnswerWithAI = async (question) => {
 
   return formattedResult;
 };
+
+export const generateCareerGuidanceAI = async (
+  userCareerProfile,
+  question,
+  conversationHistory = []
+) => {
+  const prompt = `
+      You are a professional career guidance AI trained on modern hiring practices, resume curation strategies, and job market trends.
+
+      Context:
+    - User Career Profile: ${JSON.stringify(userCareerProfile)}
+    - Dream Job Description: ${userCareerProfile.dream_job || "N/A"}
+    - Resume Summary: ${userCareerProfile.resume_text}...
+    - Conversation History: ${conversationHistory
+      .map((m) => `User: ${m.question}\nAI: ${m.ai_response}`)
+      .join("\n\n")}
+    - User Question: ${question}
+
+      Instruction:
+    Answer the user's question with career guidance. If the question relates to:
+    - **Resume**: Suggest improvements based on the dream job.
+    - **Skills**: Identify gaps and suggest paths to bridge them.
+    - **Learning**: Provide a weekly or monthly plan including free/paid resources (include links).
+    - **Career Choices**: Recommend next steps based on their background.
+
+      Always format your response in this JSON schema:
+
+    {
+      "answer": "Primary response to the user",
+      "type": ["skill_advice",
+      "timeline",
+      "resume_review",
+      "resource",
+      "general",],
+      "resources": [
+        { "type": "course", "title": "React for Beginners", "link": "https://..." },
+        { "type": "video", "title": "Career Advice for Developers", "link": "https://..." }
+      ],
+      "resumeRetouch": "Optional: Suggested improved version of the resume",
+    }
+    `;
+
+  const chatSession = model.startChat({
+    generationConfig,
+    history: [],
+  });
+
+  const result = await chatSession.sendMessage(prompt);
+
+  const resultText = result.response.text().trim();
+  let formattedResult = {};
+
+  try {
+    formattedResult = JSON.parse(resultText);
+  } catch (e) {
+    formattedResult = {
+      aanswer: text,
+      tags: [],
+      keywords: [],
+      resources: [],
+      resumeRetouch: "",
+      learningTimeline: {},
+    };
+  }
+
+  return formattedResult;
+};
