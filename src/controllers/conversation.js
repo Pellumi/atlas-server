@@ -2,9 +2,10 @@ import ChatMessage from "../models/ChatMessage.js";
 import Conversation from "../models/Conversations.js";
 import Faq from "../models/Faq.js";
 import { generateAnswerWithAI } from "../utils/AIUtilities.js";
+import { searchFaqSmart } from "../utils/SearchFaq.js";
 
 const createConversation = async (req, res, next) => {
-  const userId = req.user._id; // Assuming you’re using middleware for auth
+  const userId = req.user._id;
   const role = req.user.role;
   const { question } = req.body;
 
@@ -12,9 +13,8 @@ const createConversation = async (req, res, next) => {
     return next(ErrorHandler.BadRequest("Question is required."));
   }
 
-  // Step 1: Try to find similar FAQ
-  //   const matchedFaq = await Faq.findOne({ $text: { $search: question } });
-  const matchedFaq = false;
+  const result = await searchFaqSmart(question);
+  const matchedFaq = result?.matchedFaq || null;
 
   let answer,
     source,
@@ -28,14 +28,12 @@ const createConversation = async (req, res, next) => {
     source = "faq";
     matchedFaqId = matchedFaq._id;
   } else {
-    // Step 2: Call Gemini API to generate a new answer
     const aiResult = await generateAnswerWithAI(question);
     answer = aiResult.answer;
     tags = aiResult.tags || [];
     keywords = aiResult.keywords || [];
     source = "ai";
 
-    // Step 3: Save new FAQ
     const newFaq = new Faq({
       question,
       answer,
@@ -46,7 +44,6 @@ const createConversation = async (req, res, next) => {
     matchedFaqId = newFaq._id;
   }
 
-  // Step 4: Create conversation
   const conversation = new Conversation({
     user_id: userId,
     title: question,
@@ -54,7 +51,6 @@ const createConversation = async (req, res, next) => {
 
   await conversation.save();
 
-  // Step 5: Create initial chat message
   const chatMessage = new ChatMessage({
     conversation_id: conversation._id,
     user_id: userId,
@@ -99,9 +95,8 @@ const sendMessageToConversation = async (req, res, next) => {
     );
   }
 
-  // Check for similar FAQ
-  //   const matchedFaq = await Faq.findOne({ $text: { $search: question } });
-  const matchedFaq = false;
+  const result = await searchFaqSmart(question);
+  const matchedFaq = result?.matchedFaq || null;
 
   let answer,
     source,
@@ -121,13 +116,11 @@ const sendMessageToConversation = async (req, res, next) => {
     keywords = aiResult.keywords || [];
     source = "ai";
 
-    // Save the generated answer as a new FAQ
     const newFaq = new Faq({ question, answer, tags, keywords });
     await newFaq.save();
     matchedFaqId = newFaq._id;
   }
 
-  // Save the message to the conversation
   const chatMessage = new ChatMessage({
     conversation_id,
     user_id: userId,
@@ -174,7 +167,7 @@ const getMessagesInConversation = async (req, res) => {
   const messages = await ChatMessage.find({ conversation_id: conversationId })
     .sort({ created_at: 1 })
     .populate("matched_faq_id", "tags") // we want tags from related faq
-    .lean(); // return plain JS objects
+    .lean();
 
   if (!messages.length) {
     return res
@@ -182,7 +175,6 @@ const getMessagesInConversation = async (req, res) => {
       .json({ message: "No messages found in this conversation." });
   }
 
-  // Transform each message
   const formatted = messages.map((msg) => ({
     id: msg._id.toString(),
     question: msg.question,
