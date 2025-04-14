@@ -1,5 +1,6 @@
 import ErrorHandler from "../utils/ErrorHandler.js";
 import Faq from "../models/Faq.js";
+import { searchFaqSmart } from "../utils/SearchFaq.js";
 
 const createFaq = async (req, res, next) => {
   const { question, answer, keywords, tags } = req.body;
@@ -85,6 +86,13 @@ const deleteFaq = async (req, res, next) => {
   res.status(200).json({ success: true, message: "Faq deleted successfully" });
 };
 
+const testSearch = async (req, res) => {
+  const { question } = req.body;
+  const result = await searchFaqSmart(question);
+  const matchedFaq = result?.matchedFaq || null;
+  res.status(200).json(matchedFaq);
+};
+
 export {
   createFaq,
   bulkCreateFaqs,
@@ -92,4 +100,5 @@ export {
   getFaqById,
   updateFaq,
   deleteFaq,
+  testSearch,
 };

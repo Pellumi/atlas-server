@@ -1,10 +1,11 @@
 import express from "express";
 import {
-    bulkCreateFaqs,
+  bulkCreateFaqs,
   createFaq,
   deleteFaq,
   getAllFaqs,
   getFaqById,
+  testSearch,
   updateFaq,
 } from "../controllers/faq.js";
 
@@ -16,5 +17,6 @@ router.get("/get", getAllFaqs);
 router.get("/:id/get", getFaqById);
 router.put("/:id/update", updateFaq);
 router.delete("/:id/delete", deleteFaq);
+router.post("/test", testSearch);
 
 export default router;
