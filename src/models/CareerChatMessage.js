@@ -16,17 +16,18 @@ const careerChatMessageSchema = new mongoose.Schema({
 
   resume_context_used: { type: Boolean, default: true },
   type: {
-    type: String,
-    enum: [
-      "skill_advice",
-      "timeline",
-      "resume_review",
-      "resource",
-      "mock_interview",
-      "general",
-    ],
-    default: "general",
+    type: [String],
+    default: [],
   },
+  resources: {
+    type: String,
+    trim: true,
+  },
+  resumeRetouch: {
+    type: String,
+    trim: true,
+  },
+
   created_at: { type: Date, default: Date.now },
 });
 
