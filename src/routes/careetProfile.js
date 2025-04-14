@@ -3,6 +3,7 @@ import express from "express";
 import { protect } from "../middlewares/auth.js";
 import {
   createOrUpdateCareerProfile,
+  getUserCareerProfile,
   testUpload,
 } from "../controllers/careerProfile.js";
 import { upload, uploadToFirebase } from "../middlewares/firebaseMulter.js";
@@ -16,6 +17,8 @@ router.post(
   uploadToFirebase,
   createOrUpdateCareerProfile
 );
+
+router.get("/", protect, getUserCareerProfile);
 
 router.post(
   "/test",

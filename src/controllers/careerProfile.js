@@ -54,6 +54,18 @@ const createOrUpdateCareerProfile = async (req, res, next) => {
   res.status(200).json({ success: true, profile });
 };
 
+const getUserCareerProfile = async (req, res, next) => {
+  const user_id = req.user._id;
+
+  const profile = await UserCareerProfile.findOne({ user_id });
+
+  if (!profile) {
+    return next(ErrorReturn.NotFound("Career profile"));
+  }
+
+  res.status(200).json(profile);
+};
+
 const testUpload = async (req, res) => {
   const { fileName, fileExtension, fileUrl } = req.uploadedFile;
 
@@ -65,4 +77,4 @@ const testUpload = async (req, res) => {
   res.status(200).json({ fileName, fileExtension, fileUrl, fileSummary });
 };
 
-export { createOrUpdateCareerProfile, testUpload };
+export { createOrUpdateCareerProfile, testUpload, getUserCareerProfile };

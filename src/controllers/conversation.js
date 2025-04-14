@@ -13,9 +13,8 @@ const createConversation = async (req, res, next) => {
   }
 
   // Step 1: Try to find similar FAQ
-  const matchedFaq = await Faq.findOne({
-    $text: { $search: question },
-  });
+  //   const matchedFaq = await Faq.findOne({ $text: { $search: question } });
+  const matchedFaq = false;
 
   let answer,
     source,
