@@ -13,6 +13,8 @@ const createConversation = async (req, res, next) => {
     return next(ErrorHandler.BadRequest("Question is required."));
   }
 
+  const faqs = await Faq.find();
+
   const result = await searchFaqSmart(question);
   const matchedFaq = result?.matchedFaq || null;
 
@@ -28,7 +30,7 @@ const createConversation = async (req, res, next) => {
     source = "faq";
     matchedFaqId = matchedFaq._id;
   } else {
-    const aiResult = await generateAnswerWithAI(question);
+    const aiResult = await generateAnswerWithAI(question, faqs);
     answer = aiResult.answer;
     tags = aiResult.tags || [];
     keywords = aiResult.keywords || [];
@@ -95,6 +97,8 @@ const sendMessageToConversation = async (req, res, next) => {
     );
   }
 
+  const faqs = await Faq.find();
+
   const result = await searchFaqSmart(question);
   const matchedFaq = result?.matchedFaq || null;
 
@@ -110,7 +114,7 @@ const sendMessageToConversation = async (req, res, next) => {
     source = "faq";
     matchedFaqId = matchedFaq._id;
   } else {
-    const aiResult = await generateAnswerWithAI(question);
+    const aiResult = await generateAnswerWithAI(question, faqs);
     answer = aiResult.answer;
     tags = aiResult.tags || [];
     keywords = aiResult.keywords || [];

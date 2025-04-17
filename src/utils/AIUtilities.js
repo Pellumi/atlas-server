@@ -15,12 +15,14 @@ const generationConfig = {
   responseMimeType: "application/json",
 };
 
-export const generateAnswerWithAI = async (question) => {
+export const generateAnswerWithAI = async (question, faqs) => {
   const prompt = `
       Please provide an answer to the following question regarding Babcock University. 
+      You can use the faqs provided, if you cannot find the answers in the faqs, you can then proceed to use information found online.
       Make sure to provide accurate and relevant information about the university.
       If the information is not available, provide a general response based on your knowledge.
   
+      Faqs: ${JSON.stringify(faqs)}
       Question: ${question}
   
       Format the answer in the following structure:
